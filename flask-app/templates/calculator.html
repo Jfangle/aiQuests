@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sleek Calculator</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #000;
+            overflow: hidden;
+        }
+
+        .warp-speed {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            perspective: 1000px;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background-color: #fff;
+            opacity: 0;
+            animation: warp 6s linear infinite;
+        }
+
+        @keyframes warp {
+            0% {
+                transform: translateZ(-1500px);
+                opacity: 0;
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateZ(1500px);
+                opacity: 0;
+            }
+        }
+
+        .calculator {
+            background-color: rgba(28, 28, 30, 0.8);
+            border-radius: 20px;
+            padding: 20px;
+            width: 320px;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            z-index: 1;
+        }
+
+        .display {
+            background-color: rgba(44, 44, 46, 0.8);
+            color: #fff;
+            font-size: 40px;
+            text-align: right;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+        }
+
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        button {
+            font-size: 24px;
+            padding: 20px;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #ffffff;
+        }
+
+        .number, .decimal {
+            background-color: #505050;
+        }
+
+        .number:hover, .decimal:hover {
+            background-color: #707070;
+        }
+
+        .operator {
+            background-color: #ff9f0a;
+        }
+
+        .operator:hover {
+            background-color: #ffb340;
+        }
+
+        .equals {
+            background-color: #ff9f0a;
+        }
+
+        .equals:hover {
+            background-color: #ffb340;
+        }
+
+        .clear {
+            background-color: #d4d4d2;
+            color: #1c1c1e;
+        }
+
+        .clear:hover {
+            background-color: #e4e4e2;
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+<body>
+    <div class="warp-speed" id="warpSpeed"></div>
+    <div class="calculator">
+        <div class="display">0</div>
+        <div class="buttons">
+            <button class="clear">C</button>
+            <button class="operator">+/-</button>
+            <button class="operator">%</button>
+            <button class="operator">÷</button>
+            <button class="number">7</button>
+            <button class="number">8</button>
+            <button class="number">9</button>
+            <button class="operator">×</button>
+            <button class="number">4</button>
+            <button class="number">5</button>
+            <button class="number">6</button>
+            <button class="operator">-</button>
+            <button class="number">1</button>
+            <button class="number">2</button>
+            <button class="number">3</button>
+            <button class="operator">+</button>
+            <button class="number" style="grid-column: span 2;">0</button>
+            <button class="decimal">.</button>
+            <button class="equals">=</button>
+        </div>
+    </div>
+    
+    <!-- Add audio elements -->
+    <audio id="wilhelmScream" src="path/to/wilhelm_scream.mp3" preload="auto"></audio>
+    <audio id="yaySound" src="path/to/halo_yay.mp3" preload="auto"></audio>
+    
+    <script>
+        // Calculator functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            let display = document.querySelector('.display');
+            let buttons = document.querySelectorAll('button');
+            let currentValue = '0';
+            let operator = null;
+            let previousValue = null;
+
+            // Audio elements
+            const wilhelmScream = document.getElementById('wilhelmScream');
+            const yaySound = document.getElementById('yaySound');
+
+            buttons.forEach(button => {
+                button.addEventListener('click', function() {
+                    let value = this.textContent;
+
+                    if (this.classList.contains('number')) {
+                        if (currentValue === '0' || operator === '=') {
+                            currentValue = value;
+                        } else {
+                            currentValue += value;
+                        }
+                        display.textContent = currentValue;
+                    } else if (this.classList.contains('decimal')) {
+                        if (!currentValue.includes('.')) {
+                            currentValue += '.';
+                            display.textContent = currentValue;
+                        }
+                    } else if (this.classList.contains('operator')) {
+                        if (value === '+/-') {
+                            currentValue = (parseFloat(currentValue) * -1).toString();
+                            display.textContent = currentValue;
+                        } else if (value === '%') {
+                            currentValue = (parseFloat(currentValue) / 100).toString();
+                            display.textContent = currentValue;
+                        } else {
+                            if (previousValue !== null) {
+                                currentValue = calculate(previousValue, currentValue, operator);
+                                display.textContent = currentValue;
+                            }
+                            previousValue = currentValue;
+                            currentValue = '0';
+                            operator = value;
+                        }
+                    } else if (this.classList.contains('equals')) {
+                        if (previousValue !== null) {
+                            currentValue = calculate(previousValue, currentValue, operator);
+                            display.textContent = currentValue;
+                            previousValue = null;
+                            operator = '=';
+                            // Play yay sound
+                            yaySound.play();
+                            // Trigger confetti
+                            confetti({
+                                particleCount: 100,
+                                spread: 70,
+                                origin: { y: 0.6 }
+                            });
+                        }
+                    } else if (this.classList.contains('clear')) {
+                        currentValue = '0';
+                        previousValue = null;
+                        operator = null;
+                        display.textContent = currentValue;
+                        // Play Wilhelm scream
+                        wilhelmScream.play();
+                    }
+                });
+            });
+
+            function calculate(a, b, op) {
+                a = parseFloat(a);
+                b = parseFloat(b);
+                switch(op) {
+                    case '+': return (a + b).toString();
+                    case '-': return (a - b).toString();
+                    case '×': return (a * b).toString();
+                    case '÷': return b !== 0 ? (a / b).toString() : 'Error';
+                    default: return b.toString();
+                }
+            }
+        });
+
+        // Warp speed vortex animation
+        function createStar() {
+            const star = document.createElement('div');
+            star.classList.add('star');
+            const size = Math.random() * 2 + 1;
+            star.style.width = `${size}px`;
+            star.style.height = `${size}px`;
+            star.style.left = `${Math.random() * 100}%`;
+            star.style.top = `${Math.random() * 100}%`;
+            star.style.animationDuration = `${Math.random() * 3 + 3}s`;
+            star.style.animationDelay = `${Math.random() * 3}s`;
+            document.getElementById('warpSpeed').appendChild(star);
+
+            setTimeout(() => {
+                star.remove();
+            }, 6000);
+        }
+
+        // Create initial set of stars
+        for (let i = 0; i < 200; i++) {
+            createStar();
+        }
+
+        // Continue adding stars
+        setInterval(createStar, 100);
+    </script>
+</body>
+</html>

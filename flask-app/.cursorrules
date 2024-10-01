@@ -1,0 +1,35 @@
+{
+  "name": "Flask Calculator App",
+  "language": "python",
+  "framework": "flask",
+  "linter": "flake8",
+  "formatter": "black",
+  "test_framework": "pytest",
+  "file_structure": {
+    "app.py": "Main Flask application file",
+    "static/": "Static files (CSS, JavaScript)",
+    "templates/": "HTML templates",
+    "tests/": "Test files"
+  },
+  "dependencies": [
+    "flask",
+    "flask-wtf",
+    "pytest"
+  ],
+  "dev_dependencies": [
+    "flake8",
+    "black"
+  ],
+  "custom_commands": {
+    "run": "flask run",
+    "test": "pytest",
+    "lint": "flake8 .",
+    "format": "black ."
+  },
+  "gitignore": [
+    "__pycache__",
+    "*.pyc",
+    "venv/",
+    ".env"
+  ]
+}

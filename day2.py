@@ -53,4 +53,3 @@ def get_nutritional_info(prompt):
 # Example query
 query = "Tell me the macros of an egg"
 nutritional_info = get_nutritional_info(query)
-
